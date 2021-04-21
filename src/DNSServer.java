@@ -18,7 +18,7 @@ public class DNSServer {
         while (true) {
 
             // receive a packet 
-            byte[] buf = new byte[29];
+            byte[] buf = new byte[150];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             s1.receive(packet);
 
@@ -32,8 +32,8 @@ public class DNSServer {
 
             byte[] token = received.getBytes();
             byte[] msg = new byte[132];
-            String[] hex = new String[29];
-            for(int i=0; i<hex.length;i++) {
+            String[] hex = new String[150];
+            for(int i=0; i<token.length;i++) {
                 System.out.print(token[i]+" ");
                 hex[i]=String.format("%02X", token[i]);
             }
@@ -48,11 +48,35 @@ public class DNSServer {
        
            // String bytes="00 02 81 80 00 01 00 02 00 00 00 00 03 77 77 77 03 63 6e 6e 03 63 6f 6d 00 00 01 00 01 c0 0c 00 05 00 01 00 00 00 d0 00 1b 0a 74 75 72 6e 65 72 2d 74 6c 73 03 6d 61 70 06 66 61 73 74 6c 79 03 6e 65 74 00 c0 29 00 01 00 01 00 00 00 09 00 04 e8 21 43";
             String[] bytesA = bytes.split(" ");
-            for(int m =2; m<bytesA.length;m++) {
+            for(int m =2; m<12;m++) {
             	msg[m]=hexToByte(bytesA[m]);
+            }
+            System.out.println();
+            int length =0;
+            for(int l=13; l<token.length; l++) {
+            	if(token[l]==99&&token[l+1]==111&&token[l+2]==109) {
+            		length=l+3;
+            		System.out.println("NAME LEGNTH IS "+((l+3)-13)+" l= "+length);
+            		break;
+            	}
             }
             msg[0]=token[0];
             msg[1]= token[1];
+            msg[12]=token[12];
+            for(int h=13;h<=length;h++) {
+            	msg[h]=token[h];
+            }
+            msg[length+1]=token[length+1];
+            msg[length+2]=token[length+2];
+            msg[length+3]=token[length+3];
+            msg[length+4]=token[length+4];
+
+            String nby ="c0 0c 00 01 00 01 00 00 00 d1 00 04 8e fa 09 68";
+            String[] nbytesA = nby.split(" ");
+            for(int g=0; g<nbytesA.length;g++) {
+            	msg[g+(length+5)]=hexToByte(nbytesA[g]);
+            }
+          
             System.out.println();
             int count =0;
             for(int d=0;d<msg.length;d++) {
